@@ -1,0 +1,521 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:vm="clr-namespace:UniversalTasker.UI.ViewModels"
+                    xmlns:input="clr-namespace:UniversalTasker.Core.Input;assembly=UniversalTasker.Core"
+                    xmlns:expr="clr-namespace:UniversalTasker.Core.Expressions;assembly=UniversalTasker.Core">
+
+    <!-- Shared Styles -->
+    <Style x:Key="LabelStyle" TargetType="TextBlock">
+        <Setter Property="Margin" Value="0,8,0,4"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+    </Style>
+
+    <Style x:Key="FieldStyle" TargetType="FrameworkElement">
+        <Setter Property="Margin" Value="0,0,0,8"/>
+    </Style>
+
+    <Style x:Key="CaptureButtonStyle" TargetType="Button">
+        <Setter Property="Padding" Value="12,6"/>
+        <Setter Property="Margin" Value="0,4,0,8"/>
+    </Style>
+
+    <!-- Mouse Click Editor -->
+    <DataTemplate DataType="{x:Type vm:MouseClickViewModel}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="8">
+            <StackPanel>
+                <TextBlock Text="Name" Style="{StaticResource LabelStyle}"/>
+                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource FieldStyle}"/>
+
+                <TextBlock Text="Mouse Button" Style="{StaticResource LabelStyle}"/>
+                <ComboBox SelectedItem="{Binding Button}" Style="{StaticResource FieldStyle}">
+                    <ComboBox.ItemsSource>
+                        <x:Array Type="{x:Type input:MouseButton}">
+                            <input:MouseButton>Left</input:MouseButton>
+                            <input:MouseButton>Right</input:MouseButton>
+                            <input:MouseButton>Middle</input:MouseButton>
+                        </x:Array>
+                    </ComboBox.ItemsSource>
+                </ComboBox>
+
+                <TextBlock Text="Position" Style="{StaticResource LabelStyle}"/>
+                <Grid Style="{StaticResource FieldStyle}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="X:" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                    <TextBox Grid.Column="1" Text="{Binding X, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0"/>
+                    <TextBlock Grid.Column="2" Text="Y:" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                    <TextBox Grid.Column="3" Text="{Binding Y, UpdateSourceTrigger=PropertyChanged}"/>
+                </Grid>
+
+                <Button Command="{Binding PickLocationCommand}"
+                        Style="{StaticResource CaptureButtonStyle}">
+                    <Button.Content>
+                        <TextBlock>
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Text" Value="Pick Location (Click on Screen)"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsPicking}" Value="True">
+                                            <Setter Property="Text" Value="Click anywhere... (Right-click to cancel)"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Button.Content>
+                </Button>
+
+                <TextBlock Text="Click Count" Style="{StaticResource LabelStyle}"/>
+                <TextBox Text="{Binding ClickCount, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource FieldStyle}"/>
+            </StackPanel>
+        </ScrollViewer>
+    </DataTemplate>
+
+    <!-- Key Press Editor -->
+    <DataTemplate DataType="{x:Type vm:KeyPressViewModel}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="8">
+            <StackPanel>
+                <TextBlock Text="Name" Style="{StaticResource LabelStyle}"/>
+                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource FieldStyle}"/>
+
+                <TextBlock Text="Key" Style="{StaticResource LabelStyle}"/>
+                <Border Background="#F5F5F5" Padding="8" CornerRadius="4" Style="{StaticResource FieldStyle}">
+                    <TextBlock Text="{Binding KeyDisplayText}" FontSize="14" FontWeight="SemiBold"/>
+                </Border>
+
+                <Button Command="{Binding CaptureKeyCommand}"
+                        Style="{StaticResource CaptureButtonStyle}">
+                    <Button.Content>
+                        <TextBlock>
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Text" Value="Capture Key (Press Any Key)"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsCapturing}" Value="True">
+                                            <Setter Property="Text" Value="Press a key... (Esc to cancel)"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Button.Content>
+                </Button>
+
+                <TextBlock Text="Or enter manually:" Style="{StaticResource LabelStyle}"/>
+                <TextBlock Text="Virtual Key Code" FontSize="11" Foreground="Gray" Margin="0,0,0,4"/>
+                <TextBox Text="{Binding VirtualKeyCode, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource FieldStyle}"/>
+
+                <TextBlock Text="Modifiers" Style="{StaticResource LabelStyle}"/>
+                <StackPanel Orientation="Horizontal" Style="{StaticResource FieldStyle}">
+                    <CheckBox Content="Ctrl" IsChecked="{Binding Ctrl}" Margin="0,0,16,0"/>
+                    <CheckBox Content="Alt" IsChecked="{Binding Alt}" Margin="0,0,16,0"/>
+                    <CheckBox Content="Shift" IsChecked="{Binding Shift}"/>
+                </StackPanel>
+
+                <TextBlock Text="Common Virtual Key Codes:" Style="{StaticResource LabelStyle}"/>
+                <TextBlock FontSize="11" Foreground="Gray" TextWrapping="Wrap">
+                    A-Z: 65-90 | 0-9: 48-57 | F1-F12: 112-123
+                    <LineBreak/>
+                    Enter: 13 | Tab: 9 | Space: 32 | Esc: 27
+                    <LineBreak/>
+                    Backspace: 8 | Delete: 46 | Home: 36 | End: 35
+                </TextBlock>
+            </StackPanel>
+        </ScrollViewer>
+    </DataTemplate>
+
+    <!-- Delay Editor -->
+    <DataTemplate DataType="{x:Type vm:DelayViewModel}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="8">
+            <StackPanel>
+                <TextBlock Text="Name" Style="{StaticResource LabelStyle}"/>
+                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource FieldStyle}"/>
+
+                <TextBlock Text="Duration (milliseconds)" Style="{StaticResource LabelStyle}"/>
+                <TextBox Text="{Binding DurationMs, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource FieldStyle}"/>
+
+                <TextBlock Text="Quick Reference:" Style="{StaticResource LabelStyle}"/>
+                <TextBlock FontSize="11" Foreground="Gray">
+                    100ms = 0.1 second
+                    <LineBreak/>
+                    500ms = 0.5 second
+                    <LineBreak/>
+                    1000ms = 1 second
+                    <LineBreak/>
+                    5000ms = 5 seconds
+                </TextBlock>
+            </StackPanel>
+        </ScrollViewer>
+    </DataTemplate>
+
+    <!-- Set Variable Editor -->
+    <DataTemplate DataType="{x:Type vm:SetVariableViewModel}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="8">
+            <StackPanel>
+                <TextBlock Text="Name" Style="{StaticResource LabelStyle}"/>
+                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource FieldStyle}"/>
+
+                <TextBlock Text="Variable Name" Style="{StaticResource LabelStyle}"/>
+                <TextBox Text="{Binding VariableName, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource FieldStyle}"/>
+
+                <TextBlock Text="Value" Style="{StaticResource LabelStyle}"/>
+                <TextBox Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource FieldStyle}"
+                         AcceptsReturn="True" MinHeight="60" TextWrapping="Wrap"/>
+
+                <CheckBox Content="Evaluate as expression"
+                          IsChecked="{Binding EvaluateAsExpression}"
+                          Style="{StaticResource FieldStyle}"/>
+
+                <TextBlock Text="Examples:" Style="{StaticResource LabelStyle}"/>
+                <TextBlock FontSize="11" Foreground="Gray" TextWrapping="Wrap">
+                    Literal text: Hello World
+                    <LineBreak/>
+                    Variable interpolation: Position is {mouseX}, {mouseY}
+                    <LineBreak/>
+                    Built-in vars: {timestamp}, {mouseX}, {mouseY}
+                </TextBlock>
+            </StackPanel>
+        </ScrollViewer>
+    </DataTemplate>
+
+    <!-- Repeat Editor -->
+    <DataTemplate DataType="{x:Type vm:RepeatViewModel}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="8">
+            <StackPanel>
+                <TextBlock Text="Name" Style="{StaticResource LabelStyle}"/>
+                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource FieldStyle}"/>
+
+                <TextBlock Text="Repeat Count" Style="{StaticResource LabelStyle}"/>
+                <TextBox Text="{Binding RepeatCount, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource FieldStyle}"/>
+
+                <TextBlock Text="Counter Variable Name" Style="{StaticResource LabelStyle}"/>
+                <TextBox Text="{Binding CounterVariable, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource FieldStyle}"/>
+
+                <TextBlock Text="Child Actions" Style="{StaticResource LabelStyle}"/>
+                <Border BorderBrush="#2196F3" BorderThickness="2" Padding="8" MinHeight="80"
+                        Background="#F8F8F8" CornerRadius="4">
+                    <ItemsControl ItemsSource="{Binding Children}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Padding="4,2" Margin="0,2" Background="White" CornerRadius="2">
+                                    <TextBlock>
+                                        <Run Text="{Binding DisplayName, Mode=OneWay}" FontWeight="SemiBold"/>
+                                        <Run Text=" - " Foreground="Gray"/>
+                                        <Run Text="{Binding Name, Mode=OneWay}" Foreground="Gray"/>
+                                    </TextBlock>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Border>
+                <TextBlock FontSize="11" Foreground="Gray" FontStyle="Italic" Margin="0,4,0,0">
+                    Select this action and add child actions from the menu.
+                    Use {i} (or your counter variable) to access the loop index.
+                </TextBlock>
+            </StackPanel>
+        </ScrollViewer>
+    </DataTemplate>
+
+    <!-- While Editor -->
+    <DataTemplate DataType="{x:Type vm:WhileViewModel}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="8">
+            <StackPanel>
+                <TextBlock Text="Name" Style="{StaticResource LabelStyle}"/>
+                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource FieldStyle}"/>
+
+                <TextBlock Text="Condition" Style="{StaticResource LabelStyle}"/>
+                <Grid Style="{StaticResource FieldStyle}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox Text="{Binding LeftOperand, UpdateSourceTrigger=PropertyChanged}"
+                             Margin="0,0,4,0"/>
+                    <ComboBox Grid.Column="1" SelectedItem="{Binding Operator}"
+                              Margin="0,0,4,0" Width="120">
+                        <ComboBox.ItemsSource>
+                            <x:Array Type="{x:Type expr:ComparisonOperator}">
+                                <expr:ComparisonOperator>Equals</expr:ComparisonOperator>
+                                <expr:ComparisonOperator>NotEquals</expr:ComparisonOperator>
+                                <expr:ComparisonOperator>LessThan</expr:ComparisonOperator>
+                                <expr:ComparisonOperator>GreaterThan</expr:ComparisonOperator>
+                                <expr:ComparisonOperator>LessOrEqual</expr:ComparisonOperator>
+                                <expr:ComparisonOperator>GreaterOrEqual</expr:ComparisonOperator>
+                                <expr:ComparisonOperator>Contains</expr:ComparisonOperator>
+                                <expr:ComparisonOperator>StartsWith</expr:ComparisonOperator>
+                                <expr:ComparisonOperator>EndsWith</expr:ComparisonOperator>
+                            </x:Array>
+                        </ComboBox.ItemsSource>
+                    </ComboBox>
+                    <TextBox Grid.Column="2" Text="{Binding RightOperand, UpdateSourceTrigger=PropertyChanged}"/>
+                </Grid>
+
+                <TextBlock Text="Max Iterations (safety limit)" Style="{StaticResource LabelStyle}"/>
+                <TextBox Text="{Binding MaxIterations, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource FieldStyle}"/>
+
+                <TextBlock Text="Child Actions" Style="{StaticResource LabelStyle}"/>
+                <Border BorderBrush="#FF9800" BorderThickness="2" Padding="8" MinHeight="80"
+                        Background="#F8F8F8" CornerRadius="4">
+                    <ItemsControl ItemsSource="{Binding Children}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Padding="4,2" Margin="0,2" Background="White" CornerRadius="2">
+                                    <TextBlock>
+                                        <Run Text="{Binding DisplayName, Mode=OneWay}" FontWeight="SemiBold"/>
+                                        <Run Text=" - " Foreground="Gray"/>
+                                        <Run Text="{Binding Name, Mode=OneWay}" Foreground="Gray"/>
+                                    </TextBlock>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Border>
+                <TextBlock FontSize="11" Foreground="Gray" FontStyle="Italic" Margin="0,4,0,0">
+                    Loop while condition is true. Use {varName} for variables.
+                </TextBlock>
+            </StackPanel>
+        </ScrollViewer>
+    </DataTemplate>
+
+    <!-- Condition Editor -->
+    <DataTemplate DataType="{x:Type vm:ConditionViewModel}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="8">
+            <StackPanel>
+                <TextBlock Text="Name" Style="{StaticResource LabelStyle}"/>
+                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource FieldStyle}"/>
+
+                <TextBlock Text="Condition" Style="{StaticResource LabelStyle}"/>
+                <Grid Style="{StaticResource FieldStyle}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox Text="{Binding LeftOperand, UpdateSourceTrigger=PropertyChanged}"
+                             Margin="0,0,4,0"/>
+                    <ComboBox Grid.Column="1" SelectedItem="{Binding Operator}"
+                              Margin="0,0,4,0" Width="120">
+                        <ComboBox.ItemsSource>
+                            <x:Array Type="{x:Type expr:ComparisonOperator}">
+                                <expr:ComparisonOperator>Equals</expr:ComparisonOperator>
+                                <expr:ComparisonOperator>NotEquals</expr:ComparisonOperator>
+                                <expr:ComparisonOperator>LessThan</expr:ComparisonOperator>
+                                <expr:ComparisonOperator>GreaterThan</expr:ComparisonOperator>
+                                <expr:ComparisonOperator>LessOrEqual</expr:ComparisonOperator>
+                                <expr:ComparisonOperator>GreaterOrEqual</expr:ComparisonOperator>
+                                <expr:ComparisonOperator>Contains</expr:ComparisonOperator>
+                                <expr:ComparisonOperator>StartsWith</expr:ComparisonOperator>
+                                <expr:ComparisonOperator>EndsWith</expr:ComparisonOperator>
+                            </x:Array>
+                        </ComboBox.ItemsSource>
+                    </ComboBox>
+                    <TextBox Grid.Column="2" Text="{Binding RightOperand, UpdateSourceTrigger=PropertyChanged}"/>
+                </Grid>
+
+                <TextBlock Text="Then Actions (if true)" Style="{StaticResource LabelStyle}"/>
+                <Border BorderBrush="#4CAF50" BorderThickness="2" Padding="8" MinHeight="60"
+                        Background="#F8F8F8" CornerRadius="4">
+                    <ItemsControl ItemsSource="{Binding ThenActions}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Padding="4,2" Margin="0,2" Background="White" CornerRadius="2">
+                                    <TextBlock>
+                                        <Run Text="{Binding DisplayName, Mode=OneWay}" FontWeight="SemiBold"/>
+                                        <Run Text=" - " Foreground="Gray"/>
+                                        <Run Text="{Binding Name, Mode=OneWay}" Foreground="Gray"/>
+                                    </TextBlock>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Border>
+
+                <TextBlock Text="Else Actions (if false)" Style="{StaticResource LabelStyle}"/>
+                <Border BorderBrush="#f44336" BorderThickness="2" Padding="8" MinHeight="60"
+                        Background="#F8F8F8" CornerRadius="4">
+                    <ItemsControl ItemsSource="{Binding ElseActions}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Padding="4,2" Margin="0,2" Background="White" CornerRadius="2">
+                                    <TextBlock>
+                                        <Run Text="{Binding DisplayName, Mode=OneWay}" FontWeight="SemiBold"/>
+                                        <Run Text=" - " Foreground="Gray"/>
+                                        <Run Text="{Binding Name, Mode=OneWay}" Foreground="Gray"/>
+                                    </TextBlock>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Border>
+                <TextBlock FontSize="11" Foreground="Gray" FontStyle="Italic" Margin="0,4,0,0">
+                    Use {varName} for variables in conditions.
+                </TextBlock>
+            </StackPanel>
+        </ScrollViewer>
+    </DataTemplate>
+
+    <!-- Break Editor -->
+    <DataTemplate DataType="{x:Type vm:BreakViewModel}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="8">
+            <StackPanel>
+                <TextBlock Text="Name" Style="{StaticResource LabelStyle}"/>
+                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource FieldStyle}"/>
+
+                <Border Background="#FFF3E0" Padding="12" CornerRadius="4" Margin="0,8,0,0">
+                    <TextBlock TextWrapping="Wrap">
+                        <Run FontWeight="SemiBold">Break</Run> exits the current loop immediately.
+                        <LineBreak/>
+                        Use inside Repeat or While loops.
+                    </TextBlock>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </DataTemplate>
+
+    <!-- Continue Editor -->
+    <DataTemplate DataType="{x:Type vm:ContinueViewModel}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="8">
+            <StackPanel>
+                <TextBlock Text="Name" Style="{StaticResource LabelStyle}"/>
+                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource FieldStyle}"/>
+
+                <Border Background="#E3F2FD" Padding="12" CornerRadius="4" Margin="0,8,0,0">
+                    <TextBlock TextWrapping="Wrap">
+                        <Run FontWeight="SemiBold">Continue</Run> skips to the next iteration of the current loop.
+                        <LineBreak/>
+                        Use inside Repeat or While loops.
+                    </TextBlock>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </DataTemplate>
+
+    <!-- Timer Trigger Editor -->
+    <DataTemplate DataType="{x:Type vm:TimerTriggerViewModel}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="8">
+            <StackPanel>
+                <TextBlock Text="Name" Style="{StaticResource LabelStyle}"/>
+                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource FieldStyle}"/>
+
+                <TextBlock Text="Interval (hh:mm:ss)" Style="{StaticResource LabelStyle}"/>
+                <TextBox Text="{Binding IntervalText, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource FieldStyle}"/>
+
+                <CheckBox Content="Fire immediately on start"
+                          IsChecked="{Binding FireImmediately}"
+                          Style="{StaticResource FieldStyle}"/>
+
+                <CheckBox Content="Enabled"
+                          IsChecked="{Binding IsEnabled}"
+                          Style="{StaticResource FieldStyle}"/>
+
+                <TextBlock Text="Examples:" Style="{StaticResource LabelStyle}"/>
+                <TextBlock FontSize="11" Foreground="Gray" TextWrapping="Wrap">
+                    00:00:30 = 30 seconds
+                    <LineBreak/>
+                    00:05:00 = 5 minutes
+                    <LineBreak/>
+                    01:00:00 = 1 hour
+                </TextBlock>
+            </StackPanel>
+        </ScrollViewer>
+    </DataTemplate>
+
+    <!-- File System Trigger Editor -->
+    <DataTemplate DataType="{x:Type vm:FileSystemTriggerViewModel}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="8">
+            <StackPanel>
+                <TextBlock Text="Name" Style="{StaticResource LabelStyle}"/>
+                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource FieldStyle}"/>
+
+                <TextBlock Text="Path to Watch" Style="{StaticResource LabelStyle}"/>
+                <Grid Style="{StaticResource FieldStyle}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox Grid.Column="0" Text="{Binding Path, UpdateSourceTrigger=PropertyChanged}"
+                             Margin="0,0,4,0"/>
+                    <Button Grid.Column="1" Content="Browse..." Command="{Binding BrowsePathCommand}"
+                            Padding="8,4"/>
+                </Grid>
+
+                <TextBlock Text="Filter (e.g., *.txt, *.json)" Style="{StaticResource LabelStyle}"/>
+                <TextBox Text="{Binding Filter, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource FieldStyle}"/>
+
+                <CheckBox Content="Include subdirectories"
+                          IsChecked="{Binding IncludeSubdirectories}"
+                          Style="{StaticResource FieldStyle}"/>
+
+                <TextBlock Text="Watch for:" Style="{StaticResource LabelStyle}"/>
+                <StackPanel Style="{StaticResource FieldStyle}">
+                    <CheckBox Content="Created" IsChecked="{Binding WatchCreated}" Margin="0,2"/>
+                    <CheckBox Content="Changed" IsChecked="{Binding WatchChanged}" Margin="0,2"/>
+                    <CheckBox Content="Deleted" IsChecked="{Binding WatchDeleted}" Margin="0,2"/>
+                    <CheckBox Content="Renamed" IsChecked="{Binding WatchRenamed}" Margin="0,2"/>
+                </StackPanel>
+
+                <CheckBox Content="Enabled"
+                          IsChecked="{Binding IsEnabled}"
+                          Style="{StaticResource FieldStyle}"/>
+            </StackPanel>
+        </ScrollViewer>
+    </DataTemplate>
+
+    <!-- Hotkey Trigger Editor -->
+    <DataTemplate DataType="{x:Type vm:HotkeyTriggerViewModel}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="8">
+            <StackPanel>
+                <TextBlock Text="Name" Style="{StaticResource LabelStyle}"/>
+                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource FieldStyle}"/>
+
+                <TextBlock Text="Hotkey" Style="{StaticResource LabelStyle}"/>
+                <Border Background="#F5F5F5" Padding="8" CornerRadius="4" Style="{StaticResource FieldStyle}">
+                    <TextBlock Text="{Binding KeyDisplayText}" FontSize="14" FontWeight="SemiBold"/>
+                </Border>
+
+                <TextBlock Text="Virtual Key Code" Style="{StaticResource LabelStyle}"/>
+                <TextBox Text="{Binding VirtualKeyCode, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource FieldStyle}"/>
+
+                <TextBlock Text="Modifiers" Style="{StaticResource LabelStyle}"/>
+                <StackPanel Orientation="Horizontal" Style="{StaticResource FieldStyle}">
+                    <CheckBox Content="Ctrl" IsChecked="{Binding Ctrl}" Margin="0,0,16,0"/>
+                    <CheckBox Content="Alt" IsChecked="{Binding Alt}" Margin="0,0,16,0"/>
+                    <CheckBox Content="Shift" IsChecked="{Binding Shift}"/>
+                </StackPanel>
+
+                <CheckBox Content="Enabled"
+                          IsChecked="{Binding IsEnabled}"
+                          Style="{StaticResource FieldStyle}"/>
+            </StackPanel>
+        </ScrollViewer>
+    </DataTemplate>
+
+</ResourceDictionary>

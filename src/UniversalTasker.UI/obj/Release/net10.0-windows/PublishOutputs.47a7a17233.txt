@@ -1,0 +1,12 @@
+C:\Ishaan\Coding\AI\Claude\C#\Tasker\publish\UI\UniversalTasker.UI.exe
+C:\Ishaan\Coding\AI\Claude\C#\Tasker\publish\UI\UniversalTasker.UI.dll
+C:\Ishaan\Coding\AI\Claude\C#\Tasker\publish\UI\UniversalTasker.UI.deps.json
+C:\Ishaan\Coding\AI\Claude\C#\Tasker\publish\UI\UniversalTasker.UI.runtimeconfig.json
+C:\Ishaan\Coding\AI\Claude\C#\Tasker\publish\UI\UniversalTasker.UI.pdb
+C:\Ishaan\Coding\AI\Claude\C#\Tasker\publish\UI\CommunityToolkit.Mvvm.dll
+C:\Ishaan\Coding\AI\Claude\C#\Tasker\publish\UI\Microsoft.Extensions.DependencyInjection.Abstractions.dll
+C:\Ishaan\Coding\AI\Claude\C#\Tasker\publish\UI\Microsoft.Extensions.Logging.Abstractions.dll
+C:\Ishaan\Coding\AI\Claude\C#\Tasker\publish\UI\UniversalTasker.Core.dll
+C:\Ishaan\Coding\AI\Claude\C#\Tasker\publish\UI\UniversalTasker.Serialization.dll
+C:\Ishaan\Coding\AI\Claude\C#\Tasker\publish\UI\UniversalTasker.Core.pdb
+C:\Ishaan\Coding\AI\Claude\C#\Tasker\publish\UI\UniversalTasker.Serialization.pdb
