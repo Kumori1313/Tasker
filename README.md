@@ -1,4 +1,8 @@
-# Universal Tasker
+<p align="center">
+  <img src="Cloudys_Tasker_Icon.png" alt="Cloudy's_Tasker_Icon" width="200">
+</p>
+
+# Cloudy's Tasker
 
 > A Windows desktop automation tool for building, running, and exporting trigger-based workflows — available as both a graphical editor and a headless CLI.
 
