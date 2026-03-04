@@ -518,4 +518,44 @@
         </ScrollViewer>
     </DataTemplate>
 
+    <!-- Generic Plugin Action Editor -->
+    <DataTemplate DataType="{x:Type vm:GenericPluginActionViewModel}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="8">
+            <StackPanel>
+                <TextBlock Text="Name" Style="{StaticResource LabelStyle}"/>
+                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource FieldStyle}"/>
+
+                <Border Background="#FFF8E1" BorderBrush="#FFE082" BorderThickness="1"
+                        CornerRadius="4" Padding="8" Margin="0,4,0,12">
+                    <TextBlock TextWrapping="Wrap" FontSize="11">
+                        <Run Text="Plugin Action — " FontWeight="SemiBold"/>
+                        <Run Text="{Binding DisplayName, Mode=OneWay}"/>
+                        <Run Text=" ["/>
+                        <Run Text="{Binding Category, Mode=OneWay}"/>
+                        <Run Text="]"/>
+                    </TextBlock>
+                </Border>
+
+                <TextBlock Text="Properties" Style="{StaticResource LabelStyle}"/>
+                <ItemsControl ItemsSource="{Binding Properties}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="0,0,0,6">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="130"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{Binding Name}" VerticalAlignment="Center"
+                                           Foreground="#555" FontSize="12"/>
+                                <TextBox Grid.Column="1"
+                                         Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </ScrollViewer>
+    </DataTemplate>
+
 </ResourceDictionary>
