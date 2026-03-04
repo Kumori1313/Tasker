@@ -50,7 +50,7 @@ public abstract partial class ActionViewModel : ObservableObject
             ConditionAction ca => CreateConditionViewModel(ca),
             BreakAction ba => new BreakViewModel { Name = ba.Name },
             ContinueAction cont => new ContinueViewModel { Name = cont.Name },
-            _ => throw new ArgumentException($"Unknown action type: {action.GetType()}")
+            _ => new GenericPluginActionViewModel(action)
         };
     }
 

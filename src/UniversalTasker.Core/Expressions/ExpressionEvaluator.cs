@@ -119,11 +119,29 @@ public partial class ExpressionEvaluator : IExpressionEvaluator
     private object? ResolveVariable(string name, Actions.ExecutionContext context)
     {
         if (context.Variables.TryGetValue(name, out var value))
-        {
             return value;
+
+        // Prefix-based built-ins
+        if (name.StartsWith("window_exists:", StringComparison.OrdinalIgnoreCase))
+        {
+            var title = name["window_exists:".Length..];
+            return Input.WindowFunctions.WindowExists(title);
         }
 
-        // Built-in variables
+        if (name.StartsWith("pixel_color:", StringComparison.OrdinalIgnoreCase))
+        {
+            var coords = name["pixel_color:".Length..];
+            var comma = coords.IndexOf(',');
+            if (comma >= 0
+                && int.TryParse(coords[..comma].Trim(), out int x)
+                && int.TryParse(coords[(comma + 1)..].Trim(), out int y))
+            {
+                return Input.WindowFunctions.GetPixelColor(x, y);
+            }
+            return null;
+        }
+
+        // Simple built-in variables
         return name.ToLowerInvariant() switch
         {
             "timestamp" => DateTime.Now,

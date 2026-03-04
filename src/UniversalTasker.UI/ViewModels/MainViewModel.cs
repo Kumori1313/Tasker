@@ -19,12 +19,14 @@ public partial class MainViewModel : ObservableObject
     private readonly HotkeyService _hotkeyService = new();
     private readonly WorkflowSerializer _serializer = new();
     private readonly UndoManager _undoManager = new();
+    private readonly RecentFilesService _recentFilesService = new();
     private GlobalKeyboardHook? _hotkeyCapture;
     private string? _currentFilePath;
 
     public ObservableCollection<ActionViewModel> Actions { get; } = new();
     public ObservableCollection<TriggerViewModel> Triggers { get; } = new();
     public ObservableCollection<VariableItemViewModel> Variables { get; } = new();
+    public ObservableCollection<string> RecentFiles { get; } = new();
 
     // Execution History
     public ObservableCollection<ExecutionHistoryViewModel> ExecutionHistory { get; } = new();
@@ -87,6 +89,9 @@ public partial class MainViewModel : ObservableObject
 
     public MainViewModel()
     {
+        foreach (var path in _recentFilesService.GetRecentFiles())
+            RecentFiles.Add(path);
+
         _engine.ExecutionStarted += (_, _) =>
         {
             Application.Current.Dispatcher.Invoke(() =>
@@ -271,12 +276,22 @@ public partial class MainViewModel : ObservableObject
             workflow.ModifiedAt = DateTime.UtcNow;
             await _serializer.SaveAsync(workflow, filePath);
             StatusText = $"Saved: {System.IO.Path.GetFileName(filePath)}";
+            RecordRecentFile(filePath);
         }
         catch (Exception ex)
         {
             MessageBox.Show($"Failed to save workflow: {ex.Message}", "Save Error",
                 MessageBoxButton.OK, MessageBoxImage.Error);
         }
+    }
+
+    private void RecordRecentFile(string filePath)
+    {
+        _recentFilesService.AddFile(filePath);
+        RecentFiles.Remove(filePath);
+        RecentFiles.Insert(0, filePath);
+        while (RecentFiles.Count > RecentFilesService.MaxRecentFiles)
+            RecentFiles.RemoveAt(RecentFiles.Count - 1);
     }
 
     [RelayCommand]
@@ -290,19 +305,59 @@ public partial class MainViewModel : ObservableObject
 
         if (dialog.ShowDialog() == true)
         {
-            try
-            {
-                var workflow = await _serializer.LoadAsync(dialog.FileName);
-                LoadWorkflowToUI(workflow);
-                _currentFilePath = dialog.FileName;
-                _undoManager.Clear();
-                StatusText = $"Loaded: {System.IO.Path.GetFileName(dialog.FileName)}";
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Failed to load workflow: {ex.Message}", "Load Error",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            await LoadFromFile(dialog.FileName);
+        }
+    }
+
+    [RelayCommand]
+    private async Task OpenRecentFile(string path)
+    {
+        if (!System.IO.File.Exists(path))
+        {
+            MessageBox.Show($"File no longer exists:\n{path}", "File Not Found",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+            _recentFilesService.RemoveFile(path);
+            RecentFiles.Remove(path);
+            return;
+        }
+
+        await LoadFromFile(path);
+    }
+
+    [RelayCommand]
+    private void NewFromTemplate(string templateName)
+    {
+        var workflow = templateName switch
+        {
+            "Autoclicker" => PresetTemplates.Autoclicker(),
+            "TypingMacro" => PresetTemplates.TypingMacro(),
+            "FileMonitor" => PresetTemplates.FileMonitor(),
+            _ => null
+        };
+
+        if (workflow is null) return;
+
+        LoadWorkflowToUI(workflow);
+        _currentFilePath = null;
+        _undoManager.Clear();
+        StatusText = $"Template loaded: {workflow.Name}";
+    }
+
+    private async Task LoadFromFile(string filePath)
+    {
+        try
+        {
+            var workflow = await _serializer.LoadAsync(filePath);
+            LoadWorkflowToUI(workflow);
+            _currentFilePath = filePath;
+            _undoManager.Clear();
+            StatusText = $"Loaded: {System.IO.Path.GetFileName(filePath)}";
+            RecordRecentFile(filePath);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Failed to load workflow: {ex.Message}", "Load Error",
+                MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 

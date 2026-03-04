@@ -36,7 +36,39 @@
         <Menu Grid.Row="0">
             <MenuItem Header="_File">
                 <MenuItem Header="_New" Command="{Binding NewWorkflowCommand}" InputGestureText="Ctrl+N"/>
+                <MenuItem Header="New from _Template">
+                    <MenuItem Header="Autoclicker"
+                              Command="{Binding NewFromTemplateCommand}"
+                              CommandParameter="Autoclicker"/>
+                    <MenuItem Header="Typing Macro"
+                              Command="{Binding NewFromTemplateCommand}"
+                              CommandParameter="TypingMacro"/>
+                    <MenuItem Header="File Monitor"
+                              Command="{Binding NewFromTemplateCommand}"
+                              CommandParameter="FileMonitor"/>
+                </MenuItem>
+                <Separator/>
                 <MenuItem Header="_Open..." Command="{Binding LoadWorkflowCommand}" InputGestureText="Ctrl+O"/>
+                <MenuItem Header="Open _Recent"
+                          ItemsSource="{Binding RecentFiles}">
+                    <MenuItem.Style>
+                        <Style TargetType="MenuItem">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding RecentFiles.Count}" Value="0">
+                                    <Setter Property="IsEnabled" Value="False"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </MenuItem.Style>
+                    <MenuItem.ItemContainerStyle>
+                        <Style TargetType="MenuItem">
+                            <Setter Property="Header" Value="{Binding}"/>
+                            <Setter Property="Command" Value="{Binding DataContext.OpenRecentFileCommand,
+                                RelativeSource={RelativeSource AncestorType=Menu}}"/>
+                            <Setter Property="CommandParameter" Value="{Binding}"/>
+                        </Style>
+                    </MenuItem.ItemContainerStyle>
+                </MenuItem>
                 <Separator/>
                 <MenuItem Header="_Save" Command="{Binding SaveWorkflowCommand}" InputGestureText="Ctrl+S"/>
                 <MenuItem Header="Save _As..." Command="{Binding SaveWorkflowAsCommand}" InputGestureText="Ctrl+Shift+S"/>
