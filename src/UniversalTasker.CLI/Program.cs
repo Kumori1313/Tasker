@@ -21,8 +21,7 @@ class Program
 
         if (args.Length == 0)
         {
-            PrintUsage();
-            return ExitCodes.GeneralError;
+            return await InteractiveMode();
         }
 
         var command = args[0].ToLowerInvariant();
@@ -456,6 +455,123 @@ class Program
         Console.WriteLine($"Unknown command: {command}");
         Console.WriteLine("Use 'tasker --help' for usage information.");
         return ExitCodes.GeneralError;
+    }
+
+    static async Task<int> InteractiveMode()
+    {
+        Console.WriteLine("Universal Tasker CLI - Interactive Mode");
+        Console.WriteLine("Type 'help' for available commands, 'exit' to quit.");
+        Console.WriteLine();
+
+        while (!Cts.Token.IsCancellationRequested)
+        {
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.Write("tasker> ");
+            Console.ResetColor();
+
+            var line = Console.ReadLine();
+            if (line == null) break; // EOF (e.g. piped input ended)
+
+            line = line.Trim();
+            if (string.IsNullOrEmpty(line)) continue;
+
+            var parts = SplitArgs(line);
+            var command = parts[0].ToLowerInvariant();
+            var cmdArgs = parts.Skip(1).ToArray();
+
+            if (command is "exit" or "quit") break;
+
+            // Apply flags from the interactive input each iteration
+            _verbose = false;
+            _logFilePath = null;
+
+            if (cmdArgs.Contains("--verbose") || cmdArgs.Contains("-v"))
+            {
+                _verbose = true;
+                cmdArgs = cmdArgs.Where(a => a != "--verbose" && a != "-v").ToArray();
+            }
+
+            var logFileIndex = Array.IndexOf(cmdArgs, "--log-file");
+            if (logFileIndex >= 0 && logFileIndex + 1 < cmdArgs.Length)
+            {
+                _logFilePath = cmdArgs[logFileIndex + 1];
+                cmdArgs = cmdArgs.Where((_, i) => i != logFileIndex && i != logFileIndex + 1).ToArray();
+            }
+
+            try
+            {
+                int result = command switch
+                {
+                    "run" => await RunCommand(cmdArgs),
+                    "validate" => ValidateCommand(cmdArgs),
+                    "create" => await CreateCommand(cmdArgs),
+                    "export" => await ExportCommand(cmdArgs),
+                    "list-actions" => ListActionsCommand(),
+                    "list-triggers" => ListTriggersCommand(),
+                    "list-plugins" => ListPluginsCommand(),
+                    "--help" or "-h" or "help" => Help(),
+                    "--version" or "version" => Version(),
+                    _ => UnknownCommand(command)
+                };
+            }
+            catch (OperationCanceledException)
+            {
+                Console.WriteLine("Cancelled.");
+            }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"Error: {ex.Message}");
+                Console.ResetColor();
+                if (_verbose) Console.WriteLine(ex.StackTrace);
+            }
+
+            Console.WriteLine();
+        }
+
+        return ExitCodes.Success;
+    }
+
+    static string[] SplitArgs(string line)
+    {
+        var args = new List<string>();
+        var current = new System.Text.StringBuilder();
+        bool inQuotes = false;
+        char quoteChar = '"';
+
+        for (int i = 0; i < line.Length; i++)
+        {
+            char c = line[i];
+            if (inQuotes)
+            {
+                if (c == quoteChar)
+                    inQuotes = false;
+                else
+                    current.Append(c);
+            }
+            else if (c == '"' || c == '\'')
+            {
+                inQuotes = true;
+                quoteChar = c;
+            }
+            else if (c == ' ')
+            {
+                if (current.Length > 0)
+                {
+                    args.Add(current.ToString());
+                    current.Clear();
+                }
+            }
+            else
+            {
+                current.Append(c);
+            }
+        }
+
+        if (current.Length > 0)
+            args.Add(current.ToString());
+
+        return args.ToArray();
     }
 
     static void PrintUsage()
