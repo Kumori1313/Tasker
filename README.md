@@ -53,7 +53,15 @@ dotnet build src/UniversalTasker.UI/UniversalTasker.UI.csproj
 dotnet publish src/UniversalTasker.CLI/UniversalTasker.CLI.csproj -c Release -r win-x64 --self-contained true -o publish/cli
 ```
 
-The compiled CLI binary is named `tasker.exe`. The WPF application binary is `UniversalTasker.UI.exe`.
+The compiled CLI binary is named `tasker.exe`.
+
+### Publish a self-contained UI executable
+
+```bash
+dotnet publish src/UniversalTasker.UI/UniversalTasker.UI.csproj -c Release -r win-x64 --self-contained true -o publish/ui
+```
+
+The WPF application binary is `UniversalTasker.UI.exe`.
 
 ## Usage
 
